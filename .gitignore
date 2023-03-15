@@ -1,0 +1,12 @@
+.DS_Store
+.idea/
+app/config/.env
+app/config/venv
+venv
+data
+*/.pytest_cache/
+__pycache__/
+ *.pyc
+static/admin
+static/rest_framework
+log
