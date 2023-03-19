@@ -1,10 +1,11 @@
 import os
 from datetime import timedelta
 
-from dotenv import load_dotenv
 from pydantic import BaseSettings
 
-load_dotenv()
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 def build_dsn(

@@ -1,6 +1,8 @@
-FROM python:3.8
+FROM python:3.10
 
-WORKDIR /opt/auth
+ENV PYTHONPATH="${PYTHONPATH}:/opt/tests/src/"
+
+WORKDIR /opt/tests
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
@@ -10,10 +12,4 @@ COPY requirements.txt requirements.txt
 RUN pip install --upgrade pip \
      && pip install --no-cache-dir -r requirements.txt
 
-EXPOSE 5000
-
 COPY . .
-
-RUN ["chmod", "+x", "./docker-entrypoint.sh"]
-RUN ["chmod", "+x", "./wait-for-it.sh"]
-RUN ["chmod", "+x","./start-kafka-consumer.sh"]

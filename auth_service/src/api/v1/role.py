@@ -82,7 +82,6 @@ class UserRole(Resource):
 
     @limiter.limit('60 per minute')
     @jwt_required()
-    @role_required('admin')
     @role_api.expect(user_role_get_parser)
     @role_api.marshal_with(role_model)
     def get(self):

@@ -24,6 +24,7 @@ from db.models import User, OAuthName
 from limiter import limiter
 from oauth import oauth
 from service.account import AccountService
+from service.roles import RoleService
 from service.exceptions import UserAlreadyExists, UserDoesntExists, WrongPassword, EditUserException
 from service.oauth_provider import OAuthProviderService
 from settings import settings
@@ -32,6 +33,7 @@ from util.util import user_session_to_dict
 auth_api = Namespace('v1/auth', description='Role requests')
 account_service = AccountService(db)
 oauth_service = OAuthProviderService(db)
+role_service = RoleService(db)
 
 auth_api.models[login_model.name] = login_model
 auth_api.models[common_model.name] = common_model

@@ -1,0 +1,36 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!define FONTAWESOME https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/font-awesome-5
+title Billing API
+
+LAYOUT_LANDSCAPE()
+
+AddRelTag("red", $lineColor="red")
+
+
+ContainerDb(queue, "Queue", 'Kafka')
+
+
+Boundary(admins, "Админ Панель") {
+    Container(admin_panel, "Admin Panel", "Django")
+}
+
+Boundary(auth_bound, "Сервис авторизации") {
+    Container(auth, "Auth", 'Flask')
+}
+
+
+Boundary(billing, "Сервис биллинга") {
+    ContainerDb(billing_db, "Billing DB", "Postgres")
+    Container(billing_api, "Billing API", 'Django')
+}
+
+
+Rel_U(billing_api,  billing_db, ' ')
+Rel(billing_api,  queue, 'Изменения подписок')
+
+Rel(queue,  auth, ' Изменения подписок')
+Rel_L(admin_panel,  billing_db, ' Просмотр транзакций')
+
+
+@enduml

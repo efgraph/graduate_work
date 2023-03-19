@@ -3,6 +3,7 @@ import re
 import uuid
 from sqlalchemy import (
     BigInteger,
+    Integer,
     Boolean,
     Column,
     DateTime,
@@ -13,8 +14,10 @@ from sqlalchemy import (
 from sqlalchemy.exc import IntegrityError
 
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship, backref
 
 from db.config import db, db_session
+from enums import SubscriptionStatus
 from service.exceptions import UserAlreadyExists
 
 
@@ -67,6 +70,28 @@ class RolesUsers(db.Model):
     role_id = Column('role_id', UUID(as_uuid=True), ForeignKey('roles.id'))
 
 
+class Subscription(db.Model, TimestampMixin):
+    __tablename__ = "user_subscriptions"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(64))
+    status = Column(String(64), default=SubscriptionStatus.IDLE.value)
+    expires_at = Column(DateTime)
+    users = relationship("User", back_populates="subscription", lazy="selectin")
+
+    @classmethod
+    def create_default_subscription(cls):
+        with db_session(db) as session:
+            subscription = cls(
+                name="Free",
+                expires_at=None,
+            )
+            session.add(subscription)
+            session.commit()
+            subscription_id = subscription.id
+            return subscription_id
+
+
 class User(db.Model, TimestampMixin):
     __tablename__ = 'users'
     __table_args__ = {
@@ -79,6 +104,8 @@ class User(db.Model, TimestampMixin):
     login = Column(String(100), unique=True, nullable=False)
     email = Column(String(255), unique=True, nullable=False)
     is_superuser = Column(Boolean(), default=False)
+    subscription_id = Column(Integer, ForeignKey("user_subscriptions.id"))
+    subscription = relationship("Subscription", back_populates="users", lazy="selectin")
 
     @classmethod
     def create(cls, **kw):

@@ -3,6 +3,7 @@ from uuid import UUID
 import djstripe.models
 import stripe
 from django.db import models
+from billing_app.enums import SubscriptionStatus
 
 
 class BillingCustomer(models.Model):
@@ -39,4 +40,4 @@ class BillingCustomer(models.Model):
         return self.subscription is not None
 
     def has_active_subscription(self) -> bool:
-        return self.has_subscription() and self.subscription.status == 'active'
+        return self.has_subscription() and self.subscription.status == SubscriptionStatus.ACTIVE.value

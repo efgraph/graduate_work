@@ -4,13 +4,16 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-load_dotenv(Path(f'{str(BASE_DIR.parent)}/docker/variables.env'))
+# load_dotenv(Path(f'{str(BASE_DIR.parent)}/docker/variables.env'))
 
-SECRET_KEY = 'django-insecure-bcwg-&mr!q7f@9nnho=m%=rj2*l@lxk!qtrb58*zimtxg)!-_e'
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", 'django-insecure-bcwg-&mr!q7f@9nnho=m%=rj2*l@lxk!qtrb58*zimtxg)!-_e')
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
+
+DOMAIN_URL = os.getenv("DOMAIN_URL", "http://localhost:8000")
+BASE_API_URL = f"{DOMAIN_URL}/api/v1/"
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -90,7 +93,10 @@ USE_I18N = True
 
 USE_TZ = True
 
-STATIC_URL = 'static/'
+
+STATIC_ROOT = '/var/www/'
+STATIC_URL = '/static/'
+
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -99,6 +105,11 @@ STRIPE_TEST_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY', '')
 STRIPE_TEST_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', '')
 
 DJSTRIPE_WEBHOOK_SECRET=os.getenv('STRIPE_WEBHOOK_SECRET', '')
+
 DJSTRIPE_FOREIGN_KEY_TO_FIELD='id'
 
 JWT_SECRET_KEY=os.getenv('JWT_SECRET_KEY', '')
+
+KAFKA_CONFIG = {
+    'bootstrap.servers': os.getenv("KAFKA_BROKER_URL", "0.0.0.0:9092"),
+}

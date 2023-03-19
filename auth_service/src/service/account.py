@@ -5,8 +5,9 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
 
 from db.config import db_session
-from db.models import User, Password, UserSession
-from service.exceptions import UserAlreadyExists, UserDoesntExists, WrongPassword, EditUserException
+from db.models import User, Password, UserSession, Subscription, Role, RolesUsers
+from enums import SubscriptionStatus
+from service.exceptions import UserAlreadyExists, UserDoesntExists, WrongPassword, EditUserException, RelationDoesntExists
 
 
 class AccountService:
@@ -33,10 +34,12 @@ class AccountService:
 
     def register(self, login: str, password: str, email: str, is_superuser: bool = False):
         hash = self._generate_hex(password)
+        default_subsription_id = Subscription.create_default_subscription()
         user = User.create(
             login=login,
             email=email,
             is_superuser=is_superuser,
+            subscription_id = default_subsription_id
         )
         try:
             with db_session(self.db) as session:
@@ -47,6 +50,14 @@ class AccountService:
         password = Password(user_id=user.id, password=hash)
         with db_session(self.db) as session:
             session.add(password)
+
+        role = Role.query.filter_by(name=SubscriptionStatus.FREE.value).first()
+        if not role:
+            raise RelationDoesntExists
+        user_role = RolesUsers(user_id=user.id, role_id=role.id)
+
+        with db_session(self.db) as session:
+            session.add(user_role)
 
     def register_user_session(self, user_id: str, user_agent: str):
         user_session = UserSession(user_id=user_id, user_agent=user_agent)

@@ -4,6 +4,8 @@ from flask import (
 )
 from flask_restx import Api
 
+from api.v1.health_check import health_check_api
+from enums import SubscriptionStatus
 from oauth import oauth
 from api.v1.auth import auth_api
 from api.v1.role import role_api
@@ -13,13 +15,14 @@ from db.config import (
     migrate,
 )
 from jwt_config import jwt
+from service.roles import RoleService
 from service.account import AccountService
 from service.exceptions import UserAlreadyExists
 from limiter import limiter
 
 app = Flask(__name__)
 
-api = Api(app, version='0.1', title='Auth service')
+api = Api(app, version='0.1', title='Auth service', doc='/swagger')
 
 app.config['SQLALCHEMY_DATABASE_URI'] = settings.db.dsn
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -36,6 +39,7 @@ limiter.init_app(app)
 app.app_context().push()
 api.add_namespace(auth_api)
 api.add_namespace(role_api)
+api.add_namespace(health_check_api)
 app.secret_key = 'super secret key'
 
 
@@ -48,5 +52,16 @@ def create_super_user(name, password, email):
         account_service = AccountService(db)
         try:
             account_service.register(name, password, email, True)
+        except UserAlreadyExists:
+            pass
+
+
+@app.cli.command('create-basic-roles')
+def create_super_user():
+    with app.app_context():
+        role_service = RoleService(db)
+        try:
+            for status in SubscriptionStatus:
+                role_service.create_role(status.value, "basic role")
         except UserAlreadyExists:
             pass
