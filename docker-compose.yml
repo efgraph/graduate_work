@@ -12,8 +12,6 @@ services:
     command: ./docker-entrypoint.sh
     expose:
       - "5000"
-    ports:
-      - "5000:5000"
     depends_on:
       - auth_db
       - billing_db
@@ -26,17 +24,14 @@ services:
       - zookeeper
     ports: [ ]
     command: ./start-kafka-consumer.sh
-    environment:
-      KAFKA_HOST: kafka
-      KAFKA_PORT: 9092
+    env_file:
+      - ./docker/variables.env
 
   auth_db:
     image: postgres:14.4
     restart: always
     env_file:
       - ./docker/variables.env
-    ports:
-      - "5433:5432"
 
   billing:
     build: ./billing_service
@@ -48,8 +43,6 @@ services:
       - ./static:/var/www
     expose:
       - "8000"
-    ports:
-      - "8000:8000"
     depends_on:
       - billing_db
       - auth
@@ -61,14 +54,10 @@ services:
     restart: always
     env_file:
       - ./docker/variables.env
-    ports:
-      - "5432:5432"
 
   storage:
     image: redis:7.0.0-alpine
     container_name: auth_redis
-    ports:
-      - "6379:6379"
 
   zookeeper:
     image: wurstmeister/zookeeper
@@ -92,17 +81,6 @@ services:
       KAFKA_LISTENERS: INSIDE://:9092,OUTSIDE://:9093
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
       KAFKA_CREATE_TOPICS: "billing_user_subscribed:1:1,billing_user_unsubscribed:1:1,billing_subscription_renewal:1:1"
-
-  kafdrop:
-    image: obsidiandynamics/kafdrop
-    ports:
-      - "9002:9000"
-    environment:
-      KAFKA_BROKERCONNECT: kafka:9093
-      JVM_OPTS: "-Xms32M -Xmx64M"
-      SERVER_SERVLET_CONTEXTPATH: "/"
-    depends_on:
-      - kafka
 
   tests:
     build: ./tests

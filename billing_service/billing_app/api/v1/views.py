@@ -259,7 +259,6 @@ class StripeWebhook(View):
                     {
                         "user_id": str(billing_user.id),
                         "subscription": product["name"],
-                        "email": billing_user.email,
                         "subscription_expire_date": str(
                             subscription.current_period_end
                         ),

@@ -1,22 +1,21 @@
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
-from uuid import UUID
 
 
 @dataclass(frozen=True)
 class UserSubscribedEventSchema:
-    user_id: UUID
-    subscription: str
+    user_id: str = ""
+    subscription: str = ""
     subscription_expire_date: Optional[datetime] = None
 
 
 @dataclass(frozen=True)
 class UserUnsubscribedEventSchema:
-    user_id: UUID
+    user_id: str = ""
 
 
 @dataclass(frozen=True)
 class UserSubscriptionRenewalEventSchema:
-    user_id: UUID
-    email: str
+    user_id: str = ""
+    email: str = ""

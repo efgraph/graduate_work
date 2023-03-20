@@ -21,7 +21,6 @@ class UserSubscribedHandler(BaseKafkaHandler):
             subscription=msg["subscription"],
             subscription_expire_date=msg.get("subscription_expire_date"),
         )
-        print(str(event))
         subscription_service.update_subscription(
             user_id=event.user_id,
             status=enums.SubscriptionStatus.ACTIVE.value,
